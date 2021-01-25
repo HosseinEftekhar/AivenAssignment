@@ -16,6 +16,8 @@ at deploy time hosts can be replaced with real machines in side of .env file or 
 2-  psql -h postgres -U PG_USER  -d APIMonitor
 password: PG_Password
 
+3- select * from public.accessmonitor;
+
 ### run unit test for producer
 1- docker exec -it producer bash
 
