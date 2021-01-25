@@ -8,13 +8,18 @@ at deploy time hosts can be replaced with real machines in side of .env file or 
 ## Start up program in DEV
 1- clone git repository and navigate to its folder
 
-2- execute "docker-compose up -d"
+2- turn on postgres at Aiven Dashboard https://console.aiven.io/project/hossein-f596/services/pg-2012bd5d/overview
+
+3- execute "docker-compose up -d"
 
 ### connect to postgres container
 1- docker exec -it postgres bash 
  
-2-  psql -h postgres -U PG_USER  -d APIMonitor
-password: PG_Password
+2-  psql -h pg-2012bd5d-hossein-f596.aivencloud.com -U avnadmin  -d defaultdb -p 28437
+
+3-  select * from public.accessmonitor;
+
+password: sent via email
 
 ### run unit test for producer
 1- docker exec -it producer bash
