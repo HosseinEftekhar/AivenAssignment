@@ -1,0 +1,79 @@
+version: "3.7"
+services:
+  consumer:
+    image: consumer
+    build: ./KafkaConsumer
+    container_name: consumer
+    restart: always
+    working_dir: /app
+    volumes:
+      - ./app:/app
+    environment:
+      - KafkaHost=${KafkaHost}
+      - KafkaTopic=${KafkaTopic}
+      - PostgresHost=${PostgresHost}
+      - KafkaPort=${KafkaPort}
+      - KafkaGroupID=${KafkaGroupID}
+      - PostgresPort=${PostgresPort}
+      - PostgresUser=${PostgresUser}
+      - PostgresPassword=${PostgresPassword}
+      - PostgresDB=${PostgresDB}
+      - LogFile=${LogFile}
+    entrypoint: python3 consumer.py
+
+  producer:
+    image: producer
+    build: ./KafkaProducer
+    container_name: producer
+    restart: always
+    working_dir: /app
+    volumes:
+      - ./app:/app
+    environment:
+      - KafkaHost=${KafkaHost}
+      - KafkaTopic=${KafkaTopic}
+      - CheckPeriod=${CheckPeriod}
+      - APIAddress=${APIAddress}
+      - KafkaPort=${KafkaPort}
+      - KafkaGroupID=${KafkaGroupID}
+    entrypoint: python3 producer.py
+
+  postgres:
+    image: postgres
+    build: ./Postgres
+    container_name: postgres
+    hostname: postgres
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=$PostgresPassword
+      - POSTGRES_USER=$PostgresUser
+      - POSTGRES_DB=$PostgresDB
+    volumes:
+      - ./scripts/Postgres:/docker-entrypoint-initdb.d
+
+  kafka:
+    image: kafka
+    build: ./KafkaCluster
+    container_name: kafka
+    hostname: kafka
+    restart: always
+#    volumes:
+#      - ./KafkapersistantFiles:/bitnami/kafka
+    depends_on:
+      - zookeeper
+    environment:
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_ZOOKEEPER_CONNECT=${ZookeeperHost}:${ZookeeperPort}
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+    #entrypoint:
+    #  - bash -c "/opt/bitnami/kafka/bin/kafka-topics.sh --create --zookeeper zookeeper:2181 --replication-factor 1 --partitions 1 --topic webmonitor"
+
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    container_name: zookeeper
+    hostname: zookeeper
+    restart: always
+    ports:
+      - '2181:2181'
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
